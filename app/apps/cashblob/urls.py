@@ -11,11 +11,12 @@ from tipfy import Rule
 def get_rules(app):
     rules = [
         Rule('/', endpoint='home', handler='apps.cashblob.handlers.HomeHandler'),
-        Rule('/uploader', endpoint='cashblob/uploader', handler='apps.cashblob.handlers.UFormHandler'),
+        Rule('/uform', endpoint='cashblob/uform', handler='apps.cashblob.handlers.UFormHandler'),
         Rule('/upload', endpoint='cashblob/upload', handler='apps.cashblob.handlers.UploadHandler'),
-        Rule('/downloader', endpoint='cashblob/downloader', handler='apps.cashblob.handlers.DFormHandler'),
+        Rule('/dform', endpoint='cashblob/dform', handler='apps.cashblob.handlers.DFormHandler'),
         Rule('/download', endpoint='cashblob/download', handler='apps.cashblob.handlers.DownloadHandler'),
         Rule('/serve/<resource>', endpoint='cashblob/serve', handler='apps.cashblob.handlers.ServeHandler'),
+        Rule('/get_u_path', endpoint='cashblob/get_u_path',  handler='apps.cashblob.handlers.GetUPath'),
     ]
 
     return rules

@@ -8,7 +8,8 @@ from tipfy.ext.jinja2 import render_response
 
 class MyFile(db.Model):
     name = db.StringProperty(required=True)
-    user = db.StringProperty(required=True)
+    owner = db.StringProperty(required=True)
+    timestamp = db.DateTimeProperty(auto_now=True)
     blob_key = blobstore.BlobReferenceProperty(required=True)
 
 class HomeHandler(RequestHandler):
@@ -29,11 +30,13 @@ class DFormHandler(RequestHandler):
 class DownloadHandler(RequestHandler):
     def post(self, **kwargs):
     	account = self.request.form.get('account')
-    	query = MyFile.gql("WHERE user= :1", account)
-    	f = query.get()
-    	if f == None:
+    	#query = MyFile.gql("WHERE owner= :1", account)
+    	#f = query.get()
+        query = MyFile.all()
+        query.filter('owner =', account).order('-timestamp')   
+        f = query.get() 	
+        if f == None:
     		return render_response('hello_world.html', message='None') 
-    	#return render_response('hello_world.html', message=str(f.blob_key))
     	response = redirect_to('cashblob/serve', resource=str(f.blob_key.key()))
     	response.data = ''
         return response
@@ -55,7 +58,7 @@ class UploadHandler(RequestHandler, BlobstoreUploadMixin):
         # 'file' is the name of the file upload field in the form.
         upload_files = self.get_uploads('file')
         blob_info = upload_files[0]
-        f = MyFile(name=blob_info.filename, blob_key=blob_info.key(), user='will.lien@gmail.com')
+        f = MyFile(name=blob_info.filename, blob_key=blob_info.key(), owner='will.lien@gmail.com')
         f.put()
         # response = redirect_to('blobstore/serve', resource=blob_info.key())
         response = redirect_to('home')
@@ -68,4 +71,9 @@ class ServeHandler(RequestHandler, BlobstoreDownloadMixin):
     def get(self, **kwargs):
         blob_info = blobstore.BlobInfo.get(kwargs.get('resource'))
         return self.send_blob(blob_info)
+
+class GetUPath(RequestHandler):
+    def get(self):
+        upload_url = blobstore.create_upload_url(url_for('cashblob/upload'))
+        return Response(upload_url)
 
